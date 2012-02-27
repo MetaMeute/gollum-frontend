@@ -42,7 +42,7 @@ module Precious
     end
 
     get '/edit/*' do
-      @name = params[:splat].first
+      @name = CGI.unescape(params[:splat].first)
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       if page = wiki.page(@name)
         @page = page
@@ -115,7 +115,7 @@ module Precious
     end
 
     get '/history/:name' do
-      @name     = params[:name]
+      @name     = CGI.unescape(params[:name])
       wiki      = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       @page     = wiki.page(@name)
       @page_num = [params[:page].to_i, 1].max
@@ -136,7 +136,7 @@ module Precious
     end
 
     get '/compare/:name/:version_list' do
-      @name     = params[:name]
+      @name     = CGI.unescape(params[:name])
       @versions = params[:version_list].split(/\.{2,3}/)
       wiki      = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       @page     = wiki.page(@name)
@@ -156,7 +156,7 @@ module Precious
     end
 
     get %r{/(.+?)/([0-9a-f]{40})} do
-      name = params[:captures][0]
+      name = CGI.unescape(params[:captures][0])
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       if page = wiki.page(name, params[:captures][1])
         @page = page
@@ -185,7 +185,7 @@ module Precious
     end
 
     get '/*' do
-      show_page_or_file(params[:splat].first)
+      show_page_or_file(CGI.unescape(params[:splat].first))
     end
 
     def show_page_or_file(name)
