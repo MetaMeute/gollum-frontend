@@ -99,7 +99,6 @@ a.absent {
 #template ul,
 #template ol {
   margin-top: 1.5em;
-  margin-left: 2.6em;
 }
 
   /* Nested Lists */
@@ -112,7 +111,7 @@ a.absent {
   #template ul ul,
   #template ol ol {
     padding: 0;
-    margin: .5em 0;
+    margin: .5em 0 0 1em;
   }
 
 #template dl {
