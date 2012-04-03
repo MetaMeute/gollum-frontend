@@ -22,6 +22,37 @@
 </head>
 <body>
 
+<div id="wiki-wrapper" class="page">
+<div id="head">
+  <ul class="actions">
+    {{#session.username}}
+    <li>
+      Logged in as
+      <strong>
+        {{session.username}}
+      </strong>
+    </li>
+    {{/session.username}}
+    <li class="minibutton">
+      {{#session.username}}
+      <a href="/logout">Logout</a>
+      {{/session.username}}
+      {{^session.username}}
+      <a href="/login">Login</a>
+      {{/session.username}}
+    </li>
+  </ul>
+
+  {{#has_header}}
+  <div id="wiki-header" class="gollum-{{header_format}}-content">
+    <div id="header-content">
+      {{{header_content}}}
+    </div>
+  </div>
+  {{/has_header}}
+</div>
+</div>
+
 {{{yield}}}
 
 </body>

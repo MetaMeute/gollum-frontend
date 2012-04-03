@@ -1,5 +1,7 @@
 require 'cgi'
 require 'sinatra'
+require 'rubygems'
+require 'net/ldap'
 require 'gollum'
 require 'mustache/sinatra'
 
@@ -9,6 +11,46 @@ require 'gollum/frontend/views/editable'
 module Precious
   class App < Sinatra::Base
     register Mustache::Sinatra
+
+    set :session_secret, 'secret should be read from configfile!'
+
+    enable :sessions
+
+
+    helpers do
+      def protected!
+        return unless settings.respond_to?('private')
+
+        redirect "/login" unless authorized?
+      end
+
+      def authorized?
+        @session.include? :username
+      end
+
+      def auth(username, pass)
+        return nil unless settings.respond_to?('private')
+
+        user = settings.ldap[:base] % username
+
+        ldap = Net::LDAP.new :host => settings.ldap[:host],
+          :port => settings.ldap[:port], :auth => {
+            :method => :simple, 
+            :username => user, 
+            :password => pass
+        }
+
+        return nil unless ldap.bind
+
+        account = ldap.search( :base => user).first
+
+        cn = account[:cn].first
+
+        email = ""
+
+        return {:username => cn, :email => email}
+      end
+    end
 
     dir = File.dirname(File.expand_path(__FILE__))
 
@@ -33,6 +75,10 @@ module Precious
       disable :raise_errors, :clean_trace
     end
 
+    before do
+      @session = session
+    end
+
     configure :test do
       enable :logging, :raise_errors, :dump_errors
     end
@@ -41,7 +87,38 @@ module Precious
       show_page_or_file('Home')
     end
 
+    get '/login' do
+      # show login page
+      mustache :login
+    end
+
+    post '/login' do
+      # attempt to login user using params[:login] and params[:password]
+      # and sets session[:username] and session[:email] on success
+      #
+      #
+      # login failed. redirect to /login and add a message
+      
+      session.clear
+
+      result = auth(params[:login], params[:password])
+
+      halt 401 if result.nil?
+
+      session[:username] = result[:username]
+      session[:email] = result[:email]
+      
+      redirect "/"
+    end
+
+    get '/logout' do
+      # log user out, clear session
+      session.clear 
+      mustache :logout
+    end
+
     get '/edit/*' do
+      protected!
       @name = CGI.unescape(params[:splat].first)
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       if page = wiki.page(@name)
@@ -54,6 +131,7 @@ module Precious
     end
 
     post '/edit/*' do
+      protected!
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       page = wiki.page(params[:splat].first)
       name = params[:rename] || page.name
@@ -71,6 +149,7 @@ module Precious
     end
 
     post '/create' do
+      protected!
       name = params[:page]
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
 
@@ -86,6 +165,7 @@ module Precious
     end
 
     post '/revert/:page/*' do
+      protected!
       wiki  = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       @name = params[:page]
       @page = wiki.page(@name)
@@ -188,6 +268,14 @@ module Precious
       show_page_or_file(CGI.unescape(params[:splat].first))
     end
 
+    not_found do
+      mustache :http_404
+    end
+
+    error 401 do
+      mustache :http_401
+    end
+
     def show_page_or_file(name)
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       if page = wiki.page(name)
@@ -215,7 +303,13 @@ module Precious
     end
 
     def commit_message
-      { :message => params[:message] }
+      msg = { :message => params[:message] }
+      if session.include? :username
+        msg[:name] = session[:username]
+        msg[:email] = session[:email]
+      end
+      
+      msg
     end
   end
 end
