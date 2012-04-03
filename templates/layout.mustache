@@ -25,6 +25,7 @@
 <div id="wiki-wrapper" class="page">
 <div id="head">
   <ul class="actions">
+    {{#may_login}}
     {{#session.username}}
     <li>
       Logged in as
@@ -41,6 +42,7 @@
       <a href="/login">Login</a>
       {{/session.username}}
     </li>
+    {{/may_login}}
   </ul>
 
   {{#has_header}}

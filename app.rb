@@ -28,8 +28,12 @@ module Precious
         @session.include? :username
       end
 
+      def may_login
+        settings.respond_to?('ldap')
+      end
+
       def auth(username, pass)
-        return nil unless settings.respond_to?('private')
+        return nil unless may_login
 
         user = settings.ldap[:base] % username
 
@@ -77,6 +81,7 @@ module Precious
 
     before do
       @session = session
+      @may_login = may_login
     end
 
     configure :test do
@@ -88,11 +93,15 @@ module Precious
     end
 
     get '/login' do
+      halt 404 unless may_login
+
       # show login page
       mustache :login
     end
 
     post '/login' do
+      halt 404 unless may_login
+
       # attempt to login user using params[:login] and params[:password]
       # and sets session[:username] and session[:email] on success
       #
