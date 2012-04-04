@@ -275,11 +275,15 @@ module Precious
     end
 
     not_found do
-      mustache :http_404
+      @error = "404 - Page Not Found"
+      @message = "The requested page could not be found."
+      mustache :error
     end
 
     error 401 do
-      mustache :http_401
+      @error = "401 - Not Authorized"
+      @message = "Please login before accessing this page."
+      mustache :error
     end
 
     def show_page_or_file(name)

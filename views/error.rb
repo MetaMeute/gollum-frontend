@@ -1,7 +1,7 @@
 module Precious
   module Views
     class Error < Layout
-      attr_reader :message
+      attr_reader :message, :error
     end
   end
 end
