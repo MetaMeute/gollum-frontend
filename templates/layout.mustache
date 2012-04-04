@@ -25,18 +25,18 @@
 <div id="wiki-wrapper" class="page">
 <div id="head">
   <ul class="actions">
+    <li class="minibutton"><a href="/"
+       class="action-edit-page">Home</a></li>
+    <li class="minibutton"><a href="/pages"
+      class="action-all-pages">All Pages</a></li>
+    <li class="minibutton" class="jaws">
+      <a href="#" id="minibutton-new-page">New Page</a></li>
     {{#may_login}}
-    {{#session.username}}
-    <li>
-      Logged in as
-      <strong>
-        {{session.username}}
-      </strong>
-    </li>
-    {{/session.username}}
     <li class="minibutton">
       {{#session.username}}
-      <a href="/logout">Logout</a>
+      <a href="/logout">Logout
+        ({{session.username}})
+      </a>
       {{/session.username}}
       {{^session.username}}
       <a href="/login">Login</a>
@@ -44,6 +44,7 @@
     </li>
     {{/may_login}}
   </ul>
+  {{>searchbar}}
 
   {{#has_header}}
   <div id="wiki-header" class="gollum-{{header_format}}-content">
