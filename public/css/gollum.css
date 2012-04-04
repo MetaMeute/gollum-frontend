@@ -70,8 +70,6 @@ a:hover, a:visited {
   }
 
   .has-sidebar #wiki-body {
-    width: 68%;
-    margin-left: 230px;
   }
 
   /* @section sidebar */
@@ -79,9 +77,9 @@ a:hover, a:visited {
     background-color: #f7f7f7;
     border: 1px solid #ddd;
     font-size: 13px;
-    float: left;
+    float: right;
     padding: 7px;
-    width: 200px;
+    margin-left: 1em;
 
     border-radius: 0.5em;
     -moz-border-radius: 0.5em;
@@ -148,7 +146,6 @@ a:hover, a:visited {
   }
 
     .has-sidebar #wiki-footer {
-      width: 70%;
     }
 
     #wiki-footer #footer-content {
