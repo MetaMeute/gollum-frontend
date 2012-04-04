@@ -12,11 +12,6 @@ module Precious
   class App < Sinatra::Base
     register Mustache::Sinatra
 
-    set :session_secret, 'secret should be read from configfile!'
-
-    enable :sessions
-
-
     helpers do
       def protected!
         return unless settings.respond_to?('private')
@@ -79,13 +74,15 @@ module Precious
       disable :raise_errors, :clean_trace
     end
 
+    configure :test do
+      enable :logging, :raise_errors, :dump_errors
+    end
+
+    enable :sessions
+
     before do
       @session = session
       @may_login = may_login
-    end
-
-    configure :test do
-      enable :logging, :raise_errors, :dump_errors
     end
 
     get '/' do
