@@ -49,6 +49,18 @@ module Precious
 
         return {:username => cn, :email => email}
       end
+
+      def spamfilter!(params)
+        score = 0
+        message = params[:message]
+        score += 1.0 if not params[:email].empty?
+        score += 0.8 if message.include? "<a "
+        score += 0.8 if message.include? "[url="
+        score += 0.8 if message.include? "[link="
+        score += 0.2 if message.include? "http"
+
+        redirect "/" if score >= 1.0
+      end
     end
 
     dir = File.dirname(File.expand_path(__FILE__))
@@ -138,6 +150,7 @@ module Precious
 
     post '/edit/*' do
       protected!
+      spamfilter!(params)
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       page = wiki.page(params[:splat].first)
       name = params[:rename] || page.name
@@ -157,6 +170,8 @@ module Precious
     post '/create' do
       protected!
       name = params[:page]
+      spamfilter!(params)
+      wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
       wiki = Gollum::Wiki.new(settings.gollum_path, settings.wiki_options)
 
       format = params[:format].intern

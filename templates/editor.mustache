@@ -6,6 +6,7 @@
 <form name="gollum-editor" action="/edit/{{escaped_name}}" method="post">
 {{/is_edit_page}}
   <fieldset id="gollum-editor-fields">
+  <input type="text" name="email" id="gollum-editor-page-email">
   {{#is_create_page}}
   <div id="gollum-editor-title-field" class="singleline">
     <label for="page" class="jaws">Page Title</label>
