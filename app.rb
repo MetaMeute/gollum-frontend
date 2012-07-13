@@ -206,7 +206,7 @@ module Precious
           @page = page
           @page.version = wiki.repo.log(wiki.ref, @page.path).first
           raw_data = page.raw_data
-          @content = raw_data.respond_to?(:force_encoding) ? raw_data.force_encoding('UTF-8') : raw_data
+          @content = raw_data.respond_to?(:force_encoding) ? raw_data.force_encoding('ASCII-8BIT') : raw_data
           mustache :edit
         end
       else
