@@ -11,11 +11,15 @@
   <div id="gollum-editor-title-field" class="singleline">
     <label for="page" class="jaws">Page Title</label>
     <input type="text" name="page" id="gollum-editor-page-title" value="{{page_name}}">
+    {{#has_path}}
+    <p class="path_note"><strong>NOTE:</strong> This page will be created within the &quot;<strong>{{path}}</strong>&quot; directory</p>
+    {{/has_path}}
   </div>
   {{/is_create_page}}
   {{#is_edit_page}}
   <input type="hidden" name="page" id="gollum-editor-page-title" value="{{page_name}}">
   {{/is_edit_page}}
+  <input type="hidden" name="path" id="gollum-editor-page-path" value="{{path}}">
   <div id="gollum-editor-function-bar">
     <div id="gollum-editor-function-buttons">
     <a href="#" id="function-bold" class="function-button">
@@ -31,7 +35,7 @@
       <span>Ordered List</span></a>
     <a href="#" id="function-blockquote" class="function-button">
       <span>Blockquote</span></a>
-    
+
     <a href="#" id="function-hr" class="function-button">
       <span>Horizontal Rule</span></a>
     <span class="function-divider">&nbsp;</span>
@@ -50,8 +54,8 @@
     <a href="#" id="function-help" class="function-button">
       <span>Help</span></a>
     </div>
-      
-    <div id="gollum-editor-format-selector"> 
+
+    <div id="gollum-editor-format-selector">
       <select id="wiki_format" name="format">
       {{#formats}}
         <option {{#selected}}selected="selected" {{/selected}}value="{{id}}">
@@ -86,7 +90,7 @@
   </div>
     <textarea id="gollum-editor-body"
      data-markup-lang="{{format}}" name="content">{{content}}</textarea>
-     
+
     {{#header}}
     <div id="gollum-editor-edit-header" class="collapsed">
       <a href="#" class="button"><span>Expand/Collapse</span></a>
@@ -102,7 +106,7 @@
       <textarea id="gollum-editor-footer" name="footer">{{footer}}</textarea>
     </div>
     {{/footer}}
-    
+
     {{#sidebar}}
     <div id="gollum-editor-edit-sidebar" class="collapsed">
       <a href="#" class="button"><span>Expand/Collapse</span></a>
@@ -110,13 +114,17 @@
       <textarea id="gollum-editor-sidebar" name="sidebar">{{sidebar}}</textarea>
     </div>
     {{/sidebar}}
-    
+
     <div id="gollum-editor-edit-summary" class="singleline">
       <label for="message" class="jaws">Edit message:</label>
-      <input type="text" name="message" id="gollum-editor-message-field" value="Write a small message here explaining this change. (Optional)">
+      {{#is_create_page}}
+      <input type="text" name="message" id="gollum-editor-message-field" value="Created {{page_name}} ({{format}})">
+      {{/is_create_page}}
+      {{#is_edit_page}}
+      <input type="text" name="message" id="gollum-editor-message-field" value="Updated {{page_name}} ({{format}})">
+      {{/is_edit_page}}
     </div>
-    
-    
+
     <span class="jaws"><br></span>
     <input type="submit" id="gollum-editor-submit" value="Save" title="Save current changes">
     <a href="/preview" id="gollum-editor-preview" class="minibutton" title="Preview this Page">Preview</a>

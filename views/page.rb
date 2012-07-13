@@ -1,26 +1,28 @@
 module Precious
   module Views
     class Page < Layout
-      attr_reader :content, :page
+      include HasPage
+
+      attr_reader :content, :page, :header
       DATE_FORMAT = "%Y-%m-%d %H:%M:%S"
       DEFAULT_AUTHOR = 'you'
 
       def title
-        @page.title
-      end
-
-      def format
-        @page.format.to_s
+        @page.url_path.gsub("-", " ")
       end
 
       def author
-        return DEFAULT_AUTHOR unless @page.version
-        @page.version.author.name
+        page_versions = @page.versions
+        first = page_versions ? page_versions.first : false
+        return DEFAULT_AUTHOR unless first
+        first.author.name.respond_to?(:force_encoding) ? first.author.name.force_encoding('UTF-8') : first.author.name
       end
 
       def date
-        return Time.now.strftime(DATE_FORMAT) unless @page.version
-        @page.version.authored_date.strftime(DATE_FORMAT)
+        page_versions = @page.versions
+        first = page_versions ? page_versions.first : false
+        return Time.now.strftime(DATE_FORMAT) unless first
+        first.authored_date.strftime(DATE_FORMAT)
       end
 
       def editable
@@ -64,6 +66,18 @@ module Precious
 
       def sidebar_format
         has_sidebar && @sidebar.format.to_s
+      end
+
+      def has_toc
+        !@toc_content.nil?
+      end
+
+      def toc_content
+        @toc_content
+      end
+
+      def mathjax
+        @mathjax
       end
     end
   end
