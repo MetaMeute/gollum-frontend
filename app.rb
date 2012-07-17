@@ -81,7 +81,7 @@ module Precious
       def spamfilter!(params)
         score = 0
         message = params[:message]
-        score += 1.0 if not params[:email].empty?
+        score += 1.0 if (params.member? :email) and (not params[:email].empty?)
         score += 0.8 if message.include? "<a "
         score += 0.8 if message.include? "[url="
         score += 0.8 if message.include? "[link="
