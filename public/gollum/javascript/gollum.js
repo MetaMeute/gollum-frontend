@@ -1,5 +1,16 @@
 // ua
 $(document).ready(function() {
+  $('#delete-link').click( function(e) {
+    var ok = confirm($(this).data('confirm'));
+    if ( ok ) {
+      var loc = window.location;
+      loc = baseUrl + 'delete' + loc.pathname
+      window.location = loc;
+    }
+    // Don't navigate on cancel.
+    e.preventDefault();
+  } );
+
   var nodeSelector = {
     node1: null,
     node2: null,
@@ -97,14 +108,58 @@ $(document).ready(function() {
     }
   }
 
+  if ($('#minibutton-rename-page').length) {
+    $('#minibutton-rename-page').removeClass('jaws');
+    $('#minibutton-rename-page').click(function(e) {
+      e.preventDefault();
+
+      // Path name without the leading slash.
+      var pathname = window.location.pathname.substr(1);
+      var slashIndex = pathname.lastIndexOf('/');
+      var oldName = pathname.substr(slashIndex + 1)
+      var path = pathname.substr(0, slashIndex);
+
+      $.GollumDialog.init({
+        title: 'Rename Page',
+        fields: [
+          {
+            id:   'name',
+            name: 'Rename to',
+            type: 'text',
+            defaultValue: oldName || ''
+          }
+        ],
+        OK: function( res ) {
+          var newName = 'Rename Page';
+          if ( res['name'] ) {
+            newName = res['name'];
+          }
+
+          var msg = 'Renamed ' + oldName + ' to ' + newName;
+          jQuery.ajax( {
+            type: 'POST',
+            url: baseUrl + 'edit/' + oldName,
+            data:  { path: path, rename: newName, page: oldName, message: msg },
+            success: function() {
+                window.location = baseUrl + encodeURIComponent(newName);
+            }
+          });
+        }
+      });
+    });
+  }
+
   if ($('#minibutton-new-page').length) {
     $('#minibutton-new-page').removeClass('jaws');
     $('#minibutton-new-page').click(function(e) {
       e.preventDefault();
 
-      var path = $(this).data('path');
-      if (path) {
-        path = path + '/';
+      var path = location.pathname;
+      // ensure there's more than one slash in pathname.
+      if (path.split('/').length > 2) {
+        path = path.substr(path.lastIndexOf('/')+1) + '/';
+      } else {
+        path = '';
       }
 
       $.GollumDialog.init({
@@ -122,7 +177,7 @@ $(document).ready(function() {
           if ( res['name'] ) {
             name = res['name'];
           }
-          window.location = '/' + encodeURIComponent(name);
+          window.location = baseUrl + encodeURIComponent(name);
         }
       });
     });

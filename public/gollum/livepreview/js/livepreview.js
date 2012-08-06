@@ -1,16 +1,7 @@
-require([ 'ace/ext/static_highlight', 'ace/theme/github', 'ace/editor', 'ace/virtual_renderer', 'ace/mode/markdown', 'ace/theme/twilight',
+require([ 'ace/undomanager', 'ace/ext/static_highlight', 'ace/theme/github', 'ace/editor', 'ace/virtual_renderer', 'ace/mode/markdown', 'ace/theme/twilight',
 'ace/mode/c_cpp', 'ace/mode/clojure', 'ace/mode/coffee', 'ace/mode/coldfusion', 'ace/mode/csharp', 'ace/mode/css', 'ace/mode/diff', 'ace/mode/golang', 'ace/mode/groovy', 'ace/mode/haxe', 'ace/mode/html', 'ace/mode/java', 'ace/mode/javascript', 'ace/mode/json', 'ace/mode/latex', 'ace/mode/less', 'ace/mode/liquid', 'ace/mode/lua', 'ace/mode/markdown', 'ace/mode/ocaml', 'ace/mode/perl', 'ace/mode/pgsql', 'ace/mode/php', 'ace/mode/powershell', 'ace/mode/python', 'ace/mode/ruby', 'ace/mode/scad', 'ace/mode/scala', 'ace/mode/scss', 'ace/mode/sh', 'ace/mode/sql', 'ace/mode/svg', 'ace/mode/textile', 'ace/mode/text', 'ace/mode/xml', 'ace/mode/xquery', 'ace/mode/yaml'
 ], function() {
-// Grab functions from emscripten
-var Pointer_stringify = Module['Pointer_stringify'];
-var _str_to_html = Module['_str_to_html'];
-var malloc = Module._malloc;
-var realloc = Module._realloc;
-var writeStringToMemory = Module.writeStringToMemory;
-var allocSize = 1024;
-var pointer = malloc( allocSize ) ;
-// end emscripten
-
+var UndoManager = require("ace/undomanager").UndoManager;
 var Renderer = require( 'ace/virtual_renderer' ).VirtualRenderer;
 var Editor = require( 'ace/editor' ).Editor;
 var dom = require( 'ace/lib/dom' );
@@ -44,6 +35,7 @@ win.jsm.toggleLeftRight = function() {
 var MarkdownMode = require( 'ace/mode/markdown' ).Mode;
 
 function initAce( editor, editorSession ) {
+  editorSession.setUndoManager(new UndoManager());
   editor.setTheme( 'ace/theme/twilight' );
   editorSession.setMode( new MarkdownMode() );
   // Gutter shows line numbers
@@ -65,6 +57,9 @@ $.commentSession = commentEditorSession; // for testing
 var commentEditorContainer = commentEditor.container;
 
 initAce( commentEditor, commentEditorSession );
+
+// Find the app's base url, knowing we are in /livepreview/index.html
+var baseUrl = location.pathname.split('/').slice(0,-2).join('/');
 
 // RegExp from http://stackoverflow.com/questions/901115/get-query-string-values-in-javascript
 $.key = function( key ) {
@@ -102,19 +97,19 @@ $.save = function( commitMessage ) {
   var markdown = 'markdown';
   var txt = editorSession.getValue();
   var msg = defaultCommitMessage();
-  var newLocation = location.protocol + '//' + location.host;
+  var newLocation = location.protocol + '//' + location.host + baseUrl;
 
   if (pathName) {
     newLocation += '/' + pathName;
   }
-  
+
   newLocation += '/' + pageName;
 
   // if &create=true then handle create instead of edit.
   if ( create ) {
     jQuery.ajax( {
       type: POST,
-      url: '/create',
+      url: baseUrl + '/create',
       data:  { path: pathName, page: pageName, format: markdown, content: txt, message: commitMessage || msg },
       success: function() {
         win.location = newLocation;
@@ -123,7 +118,7 @@ $.save = function( commitMessage ) {
   } else {
     jQuery.ajax( {
       type: POST,
-      url: '/edit/' + pageName,
+      url: baseUrl + '/edit/' + pageName,
       data:  { path: pathName, page: pageName, format: markdown, content: txt, message:  commitMessage || msg },
       success: function() {
           win.location = newLocation;
@@ -231,6 +226,7 @@ function highlight( element, language ) {
   // '>' and '&gt;'.
   // Firefox does not support innerText.
   var data = element.innerText || element.textContent;
+  data = data.trim();
   var mode = getLang( language );
   // input, mode, theme, lineStart, disableGutter
   var color = staticHighlight.render( data, mode, githubTheme, 1, true );
@@ -256,19 +252,7 @@ var makePreviewHtml = function () {
   }
 
   var prevTime = new Date().getTime();
-
-  try {
-    var textLength = text.length;
-    while ( textLength > allocSize ) {
-      allocSize <<= 1; // double
-      pointer = realloc( pointer, allocSize );
-    }
-
-    writeStringToMemory( text, pointer );
-    text = Pointer_stringify( _str_to_html( pointer ) );
-  } catch ( e ) {
-    console.log( e );
-  }
+  text = md_to_html( text );
 
   // Calculate the processing time of the HTML creation.
   // It's used as the delay time in the event listener.
@@ -291,12 +275,14 @@ var makePreviewHtml = function () {
       // highlight removes an element so 0 is always the correct index.
       // Skipped tags are not removed so they must be added.
       var element = codeElements[ 0 + skipped ].firstChild;
-      if ( element == undefined) {
-        return;
+      if ( element == undefined ) {
+        skipped++;
+        continue;
       }
       var codeHTML = element.innerHTML;
-      if ( codeHTML == undefined) {
-        return;
+      if ( codeHTML == undefined ) {
+        skipped++;
+        continue;
       }
       var txt = codeHTML.split( /\b/ );
       // the syntax for code highlighting means all code, even one line, contains newlines.
@@ -342,11 +328,13 @@ var applyTimeout = function () {
   timeout = setTimeout( makePreviewHtml, elapsedTime );
 };
 
-  /* Load markdown from /data/page into the ace editor. */
-  if (location.host.indexOf('github.com') === -1) {
+  /* Load markdown from /data/page into the ace editor.
+     ~-1 == false; !~-1 == true;
+   */
+  if ( !~location.host.indexOf('github.com') ) {
     jQuery.ajax( {
       type: 'GET',
-      url: '/data/' + $.key( 'page' ),
+      url: baseUrl + '/data/' + $.key( 'page' ),
       success: function( data ) {
          editorSession.setValue( data );
       }
@@ -405,10 +393,10 @@ var applyTimeout = function () {
     var widthFourth = widthHalf / 2;
     var height = $( win ).height();
     var heightHalf = height / 2;
- 
+
     // height minus 50 so the end of document text doesn't flow off the page.
     var editorContainerStyle = 'width:' + widthHalf + 'px;' +
-      'height:' + (height - 50) + 'px;' + 
+      'height:' + (height - 50) + 'px;' +
       'left:' + (leftRight === false ? widthHalf + 'px;' : '0px;') +
       'top:' + '40px;'; // use 40px for tool menu
     cssSet( editorContainer, editorContainerStyle );
