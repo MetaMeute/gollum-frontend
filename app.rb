@@ -214,7 +214,8 @@ module Precious
       @path = wikip.path
       wiki = wikip.wiki
       if page = wikip.page
-        if wiki.live_preview && page.format.to_s.include?('markdown') && supported_useragent?(request.user_agent)
+        #if wiki.live_preview && page.format.to_s.include?('markdown') && supported_useragent?(request.user_agent)
+        if false
           live_preview_url = '/livepreview/index.html?page=' + encodeURIComponent(@name)
           if @path
             live_preview_url << '&path=' + encodeURIComponent(@path)
