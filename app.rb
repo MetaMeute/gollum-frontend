@@ -63,8 +63,8 @@ module Precious
 
         ldap = Net::LDAP.new :host => settings.ldap[:host],
           :port => settings.ldap[:port], :auth => {
-            :method => :simple, 
-            :username => user, 
+            :method => :simple,
+            :username => user,
             :password => pass
         }
 
@@ -162,7 +162,7 @@ module Precious
       #
       #
       # login failed. redirect to /login and add a message
-      
+
       session.clear
 
       result = auth(params[:login], params[:password])
@@ -171,13 +171,13 @@ module Precious
 
       session[:username] = result[:username]
       session[:email] = result[:email]
-      
+
       redirect "/"
     end
 
     get '/logout' do
       # log user out, clear session
-      session.clear 
+      session.clear
       mustache :logout
     end
 
@@ -198,11 +198,7 @@ module Precious
     end
 
     get '/data/*' do
-      @path        = extract_path(params[:splat].first)
-      @name        = extract_name(params[:splat].first)
-      wiki_options = settings.wiki_options.merge({ :page_file_dir => @path })
-      wiki         = Gollum::Wiki.new(settings.gollum_path, wiki_options)
-      if page = wiki.page(@name)
+      if page = wiki_page(params[:splat].first).page
         page.raw_data
       end
     end
@@ -220,7 +216,7 @@ module Precious
           if @path
             live_preview_url << '&path=' + encodeURIComponent(@path)
           end
-          redirect live_preview_url
+          redirect to(live_preview_url)
         else
           @page = page
           @page.version = wiki.repo.log(wiki.ref, @page.path).first
@@ -229,7 +225,7 @@ module Precious
           mustache :edit
         end
       else
-        redirect "/create/#{CGI.escape(@name)}"
+        redirect to("/create/#{CGI.escape(@name)}")
       end
     end
 
@@ -480,7 +476,7 @@ module Precious
         msg[:name] = session[:username]
         msg[:email] = session[:email]
       end
-      
+
       msg
     end
   end

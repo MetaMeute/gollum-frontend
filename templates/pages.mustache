@@ -13,12 +13,12 @@
     {{#may_login}}
     <li class="minibutton">
       {{#session.username}}
-      <a href="/logout">Logout
+      <a href="{{base_url}}logout">Logout
         ({{session.username}})
       </a>
       {{/session.username}}
       {{^session.username}}
-      <a href="/login">Login</a>
+      <a href="{{base_url}}login">Login</a>
       {{/session.username}}
     </li>
     {{/may_login}}
