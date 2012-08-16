@@ -139,12 +139,12 @@ module Precious
     before do
       @session = session
       @may_login = may_login
-      @base_url = url('/', false)
+      @base_url = url('/', false).chomp('/')
       settings.wiki_options.merge!({ :base_path => @base_url }) unless settings.wiki_options.has_key? :base_path
     end
 
     get '/' do
-      show_page_or_file('Home')
+      redirect File.join(settings.wiki_options[:base_path].to_s, 'Home')
     end
 
     get '/login' do
@@ -181,12 +181,16 @@ module Precious
       mustache :logout
     end
 
+    # path is set to name if path is nil.
+    #   if path is 'a/b' and a and b are dirs, then
+    #   path must have a trailing slash 'a/b/' or
+    #   extract_path will trim path to 'a'
     # name, path, version
     def wiki_page( name, path = nil, version = nil)
       path = name if path.nil?
-
       name = extract_name(name)
       path = extract_path(path)
+
       wiki = wiki_new
 
       OpenStruct.new(:wiki => wiki, :page => wiki.paged(name, path, version),
@@ -232,7 +236,7 @@ module Precious
     post '/edit/*' do
       protected!
       spamfilter!(params)
-      wikip = wiki_page(CGI.unescape(params[:page]), sanitize_empty_params(params[:path]))
+      wikip        = wiki_page(CGI.unescape(params[:page]), sanitize_empty_params(params[:path]))
       path         = wikip.path
       wiki         = wikip.wiki
       page         = wikip.page
@@ -263,9 +267,8 @@ module Precious
     end
 
     get '/create/*' do
-      splat = params[:splat].first
-      wikip = wiki_page(extract_name(splat).to_url, splat)
-      @name = wikip.name
+      wikip = wiki_page(params[:splat].first)
+      @name = wikip.name.to_url
       @path = wikip.path
 
       page = wikip.page
@@ -288,7 +291,7 @@ module Precious
       begin
         wiki.write_page(name, format, params[:content], commit_message)
         page = wiki.page(name)
-        redirect to("/#{page.escaped_url_path}")
+        redirect to("/#{page.escaped_url_path}") unless page.nil?
       rescue Gollum::DuplicatePageError => e
         @message = "Duplicate page: #{e.message}"
         mustache :error
@@ -380,10 +383,11 @@ module Precious
 
     get %r{/(.+?)/([0-9a-f]{40})} do
       file_path = params[:captures][0]
-      name      = extract_name(file_path)
-      path      = extract_path(file_path)
       version   = params[:captures][1]
-      if page = wiki_page(name, path, version).page
+      wikip     = wiki_page(file_path, file_path, version)
+      name      = wikip.name
+      path      = wikip.path
+      if page = wikip.page
         @page = page
         @name = name
         @content = page.formatted_data

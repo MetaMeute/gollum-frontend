@@ -99,8 +99,10 @@ $.save = function( commitMessage ) {
   var msg = defaultCommitMessage();
   var newLocation = location.protocol + '//' + location.host + baseUrl;
 
+  // 'a%2Fb' => a/b
   if (pathName) {
-    newLocation += '/' + pathName;
+    newLocation += '/' + unescape(pathName);
+    pathName = pathName + '/'; // pathName must end with /
   }
 
   newLocation += '/' + pageName;

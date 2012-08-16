@@ -4,7 +4,7 @@ $(document).ready(function() {
     var ok = confirm($(this).data('confirm'));
     if ( ok ) {
       var loc = window.location;
-      loc = baseUrl + 'delete' + loc.pathname
+      loc = baseUrl + '/delete' + loc.pathname
       window.location = loc;
     }
     // Don't navigate on cancel.
@@ -138,7 +138,7 @@ $(document).ready(function() {
           var msg = 'Renamed ' + oldName + ' to ' + newName;
           jQuery.ajax( {
             type: 'POST',
-            url: baseUrl + 'edit/' + oldName,
+            url: baseUrl + '/edit/' + oldName,
             data:  { path: path, rename: newName, page: oldName, message: msg },
             success: function() {
                 window.location = baseUrl + encodeURIComponent(newName);
@@ -157,7 +157,7 @@ $(document).ready(function() {
       var path = location.pathname;
       // ensure there's more than one slash in pathname.
       if (path.split('/').length > 2) {
-        path = path.substr(path.lastIndexOf('/')+1) + '/';
+        path = path.substr(0, path.lastIndexOf('/') + 1);
       } else {
         path = '';
       }
