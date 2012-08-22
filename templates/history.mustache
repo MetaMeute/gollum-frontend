@@ -1,27 +1,12 @@
 <div id="wiki-wrapper" class="history">
 <div id="head">
-  <h1>History for <strong>{{title}}</strong></h1>
-  <ul class="actions">
-    <li class="minibutton">
-      {{>searchbar}}
-    </li>
-    {{#may_login}}
-    <li class="minibutton">
-      {{#session.username}}
-      <a href="{{base_url}}/logout">Logout
-        ({{session.username}})
-      </a>
-      {{/session.username}}
-      {{^session.username}}
-      <a href="{{base_url}}/login">Login</a>
-      {{/session.username}}
-    </li>
-    {{/may_login}}
+  <ul class="actions page-actions">
     <li class="minibutton"><a href="{{base_url}}/{{escaped_url_path}}"
        class="action-view-page">View Page</a></li>
     <li class="minibutton"><a href="{{base_url}}/edit/{{escaped_url_path}}"
        class="action-edit-page">Edit Page</a></li>
   </ul>
+  <h1>History for <strong>{{title}}</strong></h1>
 </div>
 <div id="wiki-history">
 

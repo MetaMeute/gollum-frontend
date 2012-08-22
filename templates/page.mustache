@@ -1,17 +1,5 @@
 <div id="wiki-wrapper" class="page">
-<div id="head">
-  <ul class="actions">
-    <li class="minibutton">
-      {{>searchbar}}
-    </li>
-    <li class="minibutton"><a href="{{base_url}}/"
-       class="action-edit-page">Home</a></li>
-    <li class="minibutton"><a href="{{base_url}}/pages"
-      class="action-all-pages">All</a></li>
-    <li class="minibutton"><a href="{{base_url}}/fileview"
-    class="action-all-pages">Files</a></li>
-    <li class="minibutton" class="jaws">
-      <a href="#" id="minibutton-new-page">New</a></li>
+  <ul class="actions page-actions">
     <li class="minibutton" class="jaws">
       <a href="#" id="minibutton-rename-page">Rename</a></li>
     {{#editable}}
@@ -20,21 +8,7 @@
     {{/editable}}
     <li class="minibutton"><a href="{{base_url}}/history/{{escaped_url_path}}"
        class="action-page-history">History</a></li>
-    {{#may_login}}
-    <li class="minibutton">
-      {{#session.username}}
-      <a href="{{base_url}}/logout">Logout
-        ({{session.username}})
-      </a>
-      {{/session.username}}
-      {{^session.username}}
-      <a href="{{base_url}}/login">Login</a>
-      {{/session.username}}
-    </li>
-    {{/may_login}}
   </ul>
-
-</div>
 <div id="wiki-content">
 <div class="{{#has_header}}has-header{{/has_header}}{{#has_footer}} has-footer{{/has_footer}}{{#has_sidebar}} has-rightbar{{/has_sidebar}}{{#has_toc}} has-toc{{/has_toc}}">
   {{#has_toc}}
@@ -42,13 +16,6 @@
     {{{toc_content}}}
   </div>
   {{/has_toc}}
-  {{#has_sidebar}}
-  <div id="wiki-rightbar" class="gollum-{{sidebar_format}}-content">
-    <div id="sidebar-content" class="markdown-body">
-      {{{sidebar_content}}}
-    </div>
-  </div>
-  {{/has_sidebar}}
   <div id="wiki-body" class="gollum-{{format}}-content">
     {{#has_header}}
     <div id="wiki-header" class="gollum-{{header_format}}-content">

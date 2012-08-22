@@ -1,28 +1,6 @@
 <div id="wiki-wrapper" class="results">
 <div id="head" style="border:none;">
   <h1>{{title}}</h1>
-  <ul class="actions">
-    <li class="minibutton">
-      {{>searchbar}}
-    </li>
-    <li class="minibutton"><a href="{{base_url}}/"
-       class="action-edit-page">Home</a></li>
-    <li class="minibutton" class="jaws">
-    <a href="#" id="minibutton-new-page">New</a>
-    </li>
-    {{#may_login}}
-    <li class="minibutton">
-      {{#session.username}}
-      <a href="{{base_url}}/logout">Logout
-        ({{session.username}})
-      </a>
-      {{/session.username}}
-      {{^session.username}}
-      <a href="{{base_url}}/login">Login</a>
-      {{/session.username}}
-    </li>
-    {{/may_login}}
-  </ul>
 </div>
 <div id="pages">
 

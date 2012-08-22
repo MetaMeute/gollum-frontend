@@ -13,15 +13,15 @@
 /* @section core */
 body, html {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 10px;
+  font-size: 12pt;
   margin: 0;
   padding: 0;
 }
 
 #wiki-wrapper {
-  margin: 0 auto;
-  overflow: visible;
-  width: 80%;
+  display: table-cell;
+  vertical-align: top;
+  padding: 1em 2em;
 }
 
 a:link {
@@ -37,8 +37,6 @@ a:hover, a:visited {
 
 /* @section head */
 #head {
-  margin: 0 0 0.5em;
-  padding: 0.5em 0;
   overflow: hidden;
 }
 
@@ -67,76 +65,6 @@ a:hover, a:visited {
     display: block;
     width: 100%;
   }
-
-  .has-rightbar #wiki-body {
-  }
-
-  /* @section rightbar */
-  #wiki-rightbar {
-    background-color: #f7f7f7;
-    border: 1px solid #ddd;
-    font-size: 13px;
-    float: right;
-    padding: 7px;
-    margin-left: 1em;
-
-    border-radius: 0.5em;
-    -moz-border-radius: 0.5em;
-    -webkit-border-radius: 0.5em;
-  }
-
-    #wiki-rightbar p {
-      margin: 13px 0 0;
-    }
-
-      #wiki-rightbarn > p:first-child {
-        margin-top: 0;
-      }
-
-    #wiki-rightbar p.parent {
-      border-bottom: 1px solid #bbb;
-      font-weight: bold;
-      margin: 0 0 0.5em 0;
-      padding: 0 0 0.5em 0;
-      text-shadow: 0 1px 0 #fff;
-    }
-
-    /* Back arrow */
-    #wiki-rightbar p.parent:before {
-      color: #666;
-      content: "← ";
-    }
-
-    #wiki-rightbar h3 {
-      font-size: 1.2em;
-      color: #333;
-      margin: 1.2em 0 0;
-      padding: 0;
-      text-shadow: 0 1px 0 #fff;
-    }
-
-    #wiki-rightbar ul {
-      margin: 0.5em 0 1em;
-      padding: 0;
-    }
-
-      #wiki-rightbar ul ul {
-        margin: 0;
-      }
-
-    #wiki-rightbar ul li {
-      color: #bbb;
-      margin: 0 0 0 1em;
-      padding: 0;
-      line-height: 1.75em;
-      list-style-position: inside;
-      list-style-type: round;
-    }
-
-    #wiki-rightbar #nav ul li a {
-      font-weight: bold;
-      text-shadow: 0 1px 0 #fff;
-    }
 
   /* @section footer */
   #wiki-footer {
@@ -230,10 +158,6 @@ a:hover, a:visited {
     font-weight: bold;
   }
 
-#wiki-history {
-  margin-top: 3em;
-}
-
   #wiki-history fieldset {
     border: 0;
     margin: 2em 0;
@@ -258,9 +182,8 @@ a:hover, a:visited {
 
   #wiki-history table tr td {
     border: 1px solid #c0dce9;
-    font-size: 1.2em;
-    line-height: 1.6em;
     margin: 0;
+    font-size: 8pt;
     padding: 0.3em 0.7em;
   }
 
@@ -400,10 +323,6 @@ a:hover, a:visited {
     font-weight: bold;
   }
 
-  .compare #compare-content {
-    margin-top: 3em;
-  }
-
   .compare .data {
     border: 1px solid #ddd;
     margin-top: 1em;
@@ -421,8 +340,6 @@ a:hover, a:visited {
 
   .compare .data tr td {
     font-family: "Consolas", "Monaco", "Andale Mono", "Courier New", monospace;
-    font-size: 1.2em;
-    line-height: 1.8em;
     margin: 0;
     padding: 0;
   }
@@ -477,7 +394,7 @@ ul.actions {
 
  ul.actions li {
    float: left;
-   font-size: 1.2em;
+   font-size: 8pt;
    margin-left: 0.6em;
  }
 
@@ -643,4 +560,78 @@ ul.actions {
 #head #searchbar #searchbar-fauxtext #search-submit:hover span {
   background-position: -431px -28px;
   padding: 0;
+}
+
+/* --- sidebar --- */
+
+aside {
+  display: table-cell;
+  vertical-align: top;
+  font-size: 10pt;
+  border-right: 3pt solid #FFD11B;
+  background: #FFF8DE;
+}
+
+aside > div {
+  width: 250px;
+}
+
+#sidebar-content {
+}
+
+#sidebar-content > ul > li {
+}
+
+#wiki-sidebar ul {
+  padding: 0;
+  list-style: none;
+}
+
+#wiki-sidebar ul ul {
+  margin: 0;
+}
+
+#wiki-sidebar ul li {
+  padding: 0 1em 0 1em;
+  line-height: 1.75em;
+  list-style-position: inside;
+  list-style-type: round;
+  font-weight: bold
+}
+
+#sidebar-content li, #sidebar-content a {
+  color: #333;
+}
+
+header {
+  padding: 0.2em 1em;
+  border-bottom: 3pt solid #000;
+  background: transparent url(../images/ffhl_logo_rechts.png) right bottom no-repeat;
+  min-height: 50px;
+}
+
+aside ul.actions {
+  margin: 0;
+  padding: 0 10pt;
+}
+
+aside ul.actions li {
+  float: none;
+  padding: 0;
+  margin: 0;
+  font-size: 10pt;
+}
+
+aside h2 {
+  padding: 0 10pt;
+  font-size: 11pt;
+}
+
+header h1 a {
+  color: #555 !important;
+  font-weight: bold !important;
+}
+
+#wiki-wrapper ul.page-actions {
+  float: right;
 }

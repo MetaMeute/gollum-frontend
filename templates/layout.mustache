@@ -6,6 +6,7 @@
   <link rel="stylesheet" type="text/css" href="{{base_url}}/css/editor.css" media="all">
   <link rel="stylesheet" type="text/css" href="{{base_url}}/css/dialog.css" media="all">
   <link rel="stylesheet" type="text/css" href="{{base_url}}/css/template.css" media="all">
+  <link rel="stylesheet" type="text/css" href="{{base_url}}/css/_styles.css" media="all">
 
   <!--[if IE 7]>
   <link rel="stylesheet" type="text/css" href="{{base_url}}/css/ie7.css" media="all">
@@ -28,8 +29,50 @@
   <title>{{title}}</title>
 </head>
 <body>
+  <header>
+    <h1>
+      <a href="{{base_url}}/">
+        Freifunk Lübeck
+      </a>
+    </h1>
+  </header>
+  <aside> 
+    {{#has_sidebar}}
+    <div id="wiki-sidebar" class="gollum-{{sidebar_format}}-content">
+      <div id="sidebar-content" class="markdown-body">
+        {{{sidebar_content}}}
+      </div>
+    </div>
+    {{/has_sidebar}}
 
-{{{yield}}}
+    <h2>Actions</h2>
+
+    <ul class="actions">
+      <li>
+        {{>searchbar}}
+      </li>
+      <li><a href="{{base_url}}/pages"
+        class="action-all-pages">All</a></li>
+      <li><a href="{{base_url}}/fileview"
+      class="action-all-pages">Files</a></li>
+      <li>
+        <a href="#" id="minibutton-new-page">New</a></li>
+      {{#may_login}}
+      <li>
+        {{#session.username}}
+        <a href="{{base_url}}/logout">Logout
+          ({{session.username}})
+        </a>
+        {{/session.username}}
+        {{^session.username}}
+        <a href="{{base_url}}/login">Login</a>
+        {{/session.username}}
+      </li>
+      {{/may_login}}
+    </ul>
+  </aside>
+
+  {{{yield}}}
 
 </body>
 </html>
