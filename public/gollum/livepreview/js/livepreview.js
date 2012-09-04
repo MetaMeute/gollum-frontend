@@ -62,9 +62,10 @@ initAce( commentEditor, commentEditorSession );
 var baseUrl = location.pathname.split('/').slice(0,-2).join('/');
 
 // RegExp from http://stackoverflow.com/questions/901115/get-query-string-values-in-javascript
+// Returns value on success and undefined on failure.
 $.key = function( key ) {
     var value = new RegExp( '[\\?&]' + key + '=([^&#]*)' ).exec( location.href );
-    return  ( !value ) ? 0 : value[ 1 ] || 0;
+    return  ( !value ) ? undefined : value[ 1 ] || undefined;
 }
 
 // True if &create=true
@@ -72,10 +73,6 @@ var create = $.key( 'create' );
 // The path and name of the page being edited.
 var pageName = $.key( 'page' );
 var pathName = $.key( 'path' );
-
-if ( pathName === 0 ) {
-  pathName = undefined;
-}
 
 defaultCommitMessage = function() {
   var msg = pageName + ' (markdown)';
@@ -97,15 +94,23 @@ $.save = function( commitMessage ) {
   var markdown = 'markdown';
   var txt = editorSession.getValue();
   var msg = defaultCommitMessage();
-  var newLocation = location.protocol + '//' + location.host + baseUrl;
+  var newLocation = baseUrl;
+
+  function clean( str ) {
+    return str.replace(/^\/+/, '/');
+  }
 
   // 'a%2Fb' => a/b
-  if (pathName) {
-    newLocation += '/' + unescape(pathName);
+  if ( pathName ) {
+    pathName = unescape( pathName );
+    newLocation += '/' + pathName;
     pathName = pathName + '/'; // pathName must end with /
+
+    pathName = clean( pathName );
   }
 
   newLocation += '/' + pageName;
+  newLocation = clean( newLocation );
 
   // if &create=true then handle create instead of edit.
   if ( create ) {
@@ -264,8 +269,6 @@ var makePreviewHtml = function () {
   // Update the text using feature detection to support IE.
   // preview.innerHTML = text; // this doesn't work on IE.
   previewSet( text );
-  // MathJax is loaded asynchronously.
-  if (typeof MathJax != 'undefined') { MathJax.Hub.Typeset( content ); }
 
   // highlight code blocks.
   var codeElements = preview.getElementsByTagName( 'pre' );
@@ -333,10 +336,23 @@ var applyTimeout = function () {
   /* Load markdown from /data/page into the ace editor.
      ~-1 == false; !~-1 == true;
    */
-  if ( !~location.host.indexOf('github.com') ) {
+  if ( !~ location.host.indexOf( 'github.com' ) ) {
+    
+    // returns unescaped key with leading slashes removed
+    function key_no_leading_slash( key ) {
+      return unescape( $.key( key ) || '' ).replace( /^\/+/, '' );
+    }
+    
+    // ensure leading / is removed from path and that it ends with /
+    var path = key_no_leading_slash( 'path' );
+    // don't append '/' if path is empty from removing leading slash
+    if ( path !== '' && path.charAt( path.length - 1 ) !== '/' ) {
+      path += '/';  
+    }
+    
     jQuery.ajax( {
       type: 'GET',
-      url: baseUrl + '/data/' + $.key( 'page' ),
+      url: baseUrl + '/data/' + path + key_no_leading_slash( 'page' ),
       success: function( data ) {
          editorSession.setValue( data );
       }
@@ -397,7 +413,8 @@ var applyTimeout = function () {
     var heightHalf = height / 2;
 
     // height minus 50 so the end of document text doesn't flow off the page.
-    var editorContainerStyle = 'width:' + widthHalf + 'px;' +
+    // + 15 for scroll bar
+    var editorContainerStyle = 'width:' + (widthHalf + 15) + 'px;' +
       'height:' + (height - 50) + 'px;' +
       'left:' + (leftRight === false ? widthHalf + 'px;' : '0px;') +
       'top:' + '40px;'; // use 40px for tool menu
@@ -408,12 +425,12 @@ var applyTimeout = function () {
     var previewStyle = 'width:' + (widthHalf - 2 - 10) + 'px;' +
       'height:' + height + 'px;' +
       'left:' + (leftRight === false ? '10px;' : widthHalf + 'px;') +
-      'top:' + '0px;';
+       // preview panel top is equal to height of comment tool panel (40px) + 1
+      'top:41px;';
     cssSet( preview, previewStyle );
 
      // Resize tool panel
-    var toolPanelStyle = 'width:' + widthHalf + 'px;' +
-      'left:' + (leftRight === false ? widthHalf + 'px;' : '0px;');
+    var toolPanelStyle = 'width:50%;';
     cssSet( toolPanel, toolPanelStyle );
 
     // Resize comment related elements.
@@ -428,10 +445,12 @@ var applyTimeout = function () {
     cssSet( commentEditorContainer, commentEditorContainerStyle );
     commentEditor.resize();
 
+    var commentToolPanelHeight = height / 4 - 40;
+
     // In top subtract height (40px) of comment tool panel.
     var commentToolPanelStyle = 'width:' + widthHalf + 'px;' +
       'left:' + widthFourth + 'px;' +
-      'top:' + (height / 4 - 40) + 'px;' +
+      'top:' + commentToolPanelHeight + 'px;' +
       commentHidden;
     cssSet( commentToolPanel, commentToolPanelStyle );
 
@@ -443,6 +462,11 @@ var applyTimeout = function () {
   }
 
   win.jsm.resize = resize;
+
+  // remove editor_bg after loading because
+  // it'll cause problems if toggle left right is used
+  var ebg = doc.getElementById('editor_bg');
+  ebg.parentNode.removeChild(ebg);
 
   /*
      Resize can be called an absurd amount of times
