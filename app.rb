@@ -11,7 +11,6 @@ require 'gollum/frontend/views/layout'
 require 'gollum/frontend/views/editable'
 require 'gollum/frontend/views/has_page'
 
-require File.expand_path '../uri_encode_component', __FILE__
 require File.expand_path '../helpers', __FILE__
 
 # Fix to_url
@@ -181,19 +180,26 @@ module Precious
       mustache :logout
     end
 
+    # Removes all slashes from the start of string.
+    def clean_url url
+      return url if url.nil?
+      url.gsub('%2F','/').gsub(/^\/+/,'')
+    end
+
     # path is set to name if path is nil.
     #   if path is 'a/b' and a and b are dirs, then
     #   path must have a trailing slash 'a/b/' or
     #   extract_path will trim path to 'a'
     # name, path, version
-    def wiki_page( name, path = nil, version = nil)
+    def wiki_page(name, path = nil, version = nil, exact = true)
       path = name if path.nil?
       name = extract_name(name)
       path = extract_path(path)
+      path = '/' if exact && path.nil?
 
       wiki = wiki_new
 
-      OpenStruct.new(:wiki => wiki, :page => wiki.paged(name, path, version),
+      OpenStruct.new(:wiki => wiki, :page => wiki.paged(name, path, exact, version),
                      :name => name, :path => path)
     end
 
@@ -229,21 +235,21 @@ module Precious
           mustache :edit
         end
       else
-        redirect to("/create/#{CGI.escape(@name)}")
+        redirect to("/create/#{encodeURIComponent(@name)}")
       end
     end
 
     post '/edit/*' do
       protected!
       spamfilter!(params)
-      wikip        = wiki_page(CGI.unescape(params[:page]), sanitize_empty_params(params[:path]))
-      path         = wikip.path
-      wiki         = wikip.wiki
-      page         = wikip.page
-      rename       = params[:rename].to_url if params[:rename]
-      name         = rename || page.name
-      committer    = Gollum::Committer.new(wiki, commit_message)
-      commit       = {:committer => committer}
+      path      = '/' + clean_url(sanitize_empty_params(params[:path])).to_s
+      page_name = CGI.unescape(params[:page])
+      wiki      = wiki_new
+      page      = wiki.paged(page_name, path, exact = true)
+      rename    = params[:rename].to_url if params[:rename]
+      name      = rename || page.name
+      committer = Gollum::Committer.new(wiki, commit_message)
+      commit    = {:committer => committer}
 
       update_wiki_page(wiki, page, params[:content], commit, name, params[:format])
       update_wiki_page(wiki, page.header,  params[:header],  commit) if params[:header]
@@ -267,7 +273,7 @@ module Precious
     end
 
     get '/create/*' do
-      wikip = wiki_page(params[:splat].first)
+      wikip = wiki_page(params[:splat].first.gsub('+', '-'))
       @name = wikip.name.to_url
       @path = wikip.path
 
@@ -282,6 +288,7 @@ module Precious
     post '/create' do
       name         = params[:page].to_url
       path         = sanitize_empty_params(params[:path])
+      path = '' if path.nil?
       format       = params[:format].intern
 
       # write_page is not directory aware so use wiki_options to emulate dir support.
@@ -290,8 +297,7 @@ module Precious
 
       begin
         wiki.write_page(name, format, params[:content], commit_message)
-        page = wiki.page(name)
-        redirect to("/#{page.escaped_url_path}") unless page.nil?
+        redirect to("/#{clean_url(CGI.escape(::File.join(path,name)))}")
       rescue Gollum::DuplicatePageError => e
         @message = "Duplicate page: #{e.message}"
         mustache :error
@@ -371,12 +377,6 @@ module Precious
       mustache :compare
     end
 
-    get '/_tex.png' do
-      content_type 'image/png'
-      formula = Base64.decode64(params[:data])
-      Gollum::Tex.render_formula(formula)
-    end
-
     get %r{^/(javascript|css|images)} do
       halt 404
     end
@@ -448,7 +448,9 @@ module Precious
       path         = extract_path(fullpath)
       wiki         = wiki_new
 
-      if page = wiki.paged(name, path)
+      path = '/' if path.nil?
+
+      if page = wiki.paged(name, path, exact = true)
         @page = page
         @name = name
         @editable = true
@@ -461,7 +463,7 @@ module Precious
         file.raw_data
       else
         page_path = [path, name].compact.join('/')
-        redirect to("/create/#{CGI.escape(page_path).gsub('%2F','/')}")
+        redirect to("/create/#{clean_url(encodeURIComponent(page_path))}")
       end
     end
 
