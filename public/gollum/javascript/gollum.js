@@ -4,7 +4,7 @@ $(document).ready(function() {
     var ok = confirm($(this).data('confirm'));
     if ( ok ) {
       var loc = window.location;
-      loc = baseUrl + '/delete' + loc.pathname
+      loc = baseUrl + '/delete' + loc.pathname.replace(baseUrl,'');
       window.location = loc;
     }
     // Don't navigate on cancel.
@@ -141,7 +141,7 @@ $(document).ready(function() {
             url: baseUrl + '/edit/' + oldName,
             data:  { path: path, rename: newName, page: oldName, message: msg },
             success: function() {
-                window.location = baseUrl + encodeURIComponent(newName);
+                window.location = baseUrl + '/' + encodeURIComponent(newName);
             }
           });
         }
@@ -154,14 +154,6 @@ $(document).ready(function() {
     $('#minibutton-new-page').click(function(e) {
       e.preventDefault();
 
-      var path = location.pathname;
-      // ensure there's more than one slash in pathname.
-      if (path.split('/').length > 2) {
-        path = path.substr(0, path.lastIndexOf('/') + 1);
-      } else {
-        path = '';
-      }
-
       $.GollumDialog.init({
         title: 'Create New Page',
         fields: [
@@ -169,7 +161,7 @@ $(document).ready(function() {
             id:   'name',
             name: 'Page Name',
             type: 'text',
-            defaultValue: path || ''
+            defaultValue: ''
           }
         ],
         OK: function( res ) {
@@ -177,7 +169,7 @@ $(document).ready(function() {
           if ( res['name'] ) {
             name = res['name'];
           }
-          window.location = baseUrl + encodeURIComponent(name);
+          window.location = baseUrl + '/' + encodeURIComponent(name);
         }
       });
     });
