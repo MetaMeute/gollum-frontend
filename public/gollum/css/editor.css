@@ -250,9 +250,7 @@ a#function-help:hover span { background-position: -405px -28px; }
 #gollum-editor textarea {
   background: #fff;
   border: 1px solid #ddd;
-  font-size: 1.3em;
   font-family: monospace;
-  line-height: 1.4em;
   margin: 1em 0 0.4em;
   padding: 0.5em;
   width: 98%;
