@@ -7,9 +7,9 @@ require 'mustache/sinatra'
 require 'useragent'
 require 'stringex'
 
-require 'gollum/frontend/views/layout'
-require 'gollum/frontend/views/editable'
-require 'gollum/frontend/views/has_page'
+require 'views/layout'
+require 'views/editable'
+require 'views/has_page'
 
 require File.expand_path '../helpers', __FILE__
 
@@ -29,7 +29,7 @@ end
 # There are a number of wiki options that can be set for the frontend
 #
 # Example
-# require 'gollum/frontend/app'
+# require 'app'
 # Precious::App.set(:wiki_options, {
 #     :universal_toc => false,
 # }
