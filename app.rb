@@ -44,7 +44,7 @@ module Precious
       def protected!
         return unless settings.respond_to?('private')
 
-        redirect "/login" unless authorized?
+        redirect to("/login") unless authorized?
       end
 
       def authorized?
@@ -87,7 +87,7 @@ module Precious
         score += 0.8 if message.include? "[link="
         score += 0.2 if message.include? "http"
 
-        redirect "/" if score >= 1.0
+        redirect to("/") if score >= 1.0
       end
     end
 
@@ -171,7 +171,7 @@ module Precious
       session[:username] = result[:username]
       session[:email] = result[:email]
 
-      redirect "/"
+      redirect to("/")
     end
 
     get '/logout' do
