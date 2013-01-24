@@ -1,0 +1,205 @@
+@import '_buttons';
+@import '_dialog';
+@import '_editor';
+
+$sidebar_border_width: 0.3em;
+$sidebar_border: $sidebar_border_width solid #ffd11b;
+$sidebar_width: 20em;
+$sidebar_breakpoint: 767px;
+
+$head_height: 2.7em;
+
+$link_normal: #337;
+$link_hover: #dc0067;
+
+body {
+  margin: 0;
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-size: 10pt;
+  color: #4A4235;
+}
+
+header {
+  padding: 0 1em;
+  border-bottom: 3pt solid black;
+  min-height: 6em;
+  background: transparent url(../images/ffhl_logo.png) right bottom no-repeat;
+  background-size: auto 90%;
+}
+
+header h1 {
+  margin: 0;
+  padding: 1em 0;
+}
+
+a {
+  color: $link_normal;
+}
+
+header a, .sidebar a {
+  text-decoration: none;
+}
+
+a:hover {
+  color: $link_hover;
+}
+
+h1, h2, h3, h4, h5 {
+  color: #2C251D;
+}
+
+#wiki-content {
+  padding: 0.5em 1.4em;
+
+  .markdown-body {
+    font-size: 1.2em;
+
+    p {
+      line-height: 1.4em;
+      max-width: 70em;
+    }
+
+    pre {
+      font-size: 0.8em;
+    }
+  }
+}
+
+#wiki-wrapper img {
+  max-width: 100%;
+}
+
+.sidebar {
+  padding: 1em;
+  background: #fff8de;
+  border-bottom: $sidebar_border;
+
+  ul {
+    list-style: none;
+    padding-left: 1em;
+  }
+
+  li {
+    font-weight: bold;
+  }
+}
+
+#head {
+  white-space: no-wrap;
+  list-style: none;
+  margin: 0;
+  background: black;
+  height: $head_height;
+  width: 100%;
+
+  h1 {
+    float: left;
+    padding-left: 0.5em;
+    color: #fff;
+  }
+
+  * {
+    margin: 0;
+  }
+
+  .page-actions {
+    position: absolute;
+    right: 0;
+    text-align: right;
+    padding: 0 0.5em;
+    li {
+      display: inline-block;
+    }
+  }
+}
+
+#container {
+  position: relative;
+}
+
+@media only screen and (max-width: $sidebar_breakpoint - 1px) {
+  .sidebar {
+    border-top: $sidebar_border;
+  }
+}
+
+@media only screen and (min-width: $sidebar_breakpoint) { 
+  #wiki-wrapper {
+    margin-left: $sidebar_width;
+  }
+
+  .sidebar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: $sidebar_width - 2.0em - $sidebar_border_width;
+    display: block;
+    float: right;
+    border-right: $sidebar_border;
+  }
+}
+
+@media only screen and (max-width: 470px) {
+  header {
+    text-align: center;
+    padding-top: 7em;
+    min-height: 0;
+    padding-bottom: 0;
+    background-size: auto 6em;
+    background-position: center 1em;
+  }
+
+  .page-actions {
+    text-align: center;
+  }
+}
+
+.minibutton a {
+  text-decoration: none;
+  @include button;
+  @include color(#333);
+}
+
+
+.downloadblock {
+  vertical-align: top;
+  display: inline-block;
+  margin: 0.1em 0;
+  width: 27em;
+  height: 21em;
+  border: 1pt solid #ffd11b;
+
+  img {
+    padding-left: 1em;
+    vertical-align: bottom;
+    position: relative;
+    bottom: 6em;
+  }
+
+  ul {
+    vertical-align: top;
+    display: inline-block;
+    height: 100%;
+    list-style: none;
+    padding: 0;
+
+    li {
+      margin-bottom: 0.5em;
+    }
+  }
+  
+  h2 {
+    padding: 0.25em 0.5em;
+    margin: 0;
+    background: #fff8de;
+  }
+}
+
+span.tag {
+  background: #dc0067;
+  color: #fff;
+  font-weight: bold;
+  font-size: 0.8em;
+  padding: 0.1em 0.4em;
+  border-radius: 0.3em;
+}
