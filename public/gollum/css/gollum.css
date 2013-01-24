@@ -638,6 +638,24 @@ a#function-help:hover span {
   padding-top: 0.25em;
   padding-bottom: 0.75em; }
 
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  font-size: 0.9em; }
+  table td, table th {
+    border: 1px solid #ffd11b;
+    padding: 0.2em 0.5em; }
+  table th {
+    text-align: left;
+    border-bottom: 2pt solid #ffd11b;
+    white-space: nowrap;
+    background-color: #ffd11b;
+    color: #4e3e00; }
+  table tr {
+    line-height: 1.4em; }
+    table tr:nth-child(2n) {
+      background-color: #fffdf6; }
+
 body {
   margin: 0;
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
@@ -743,7 +761,7 @@ h1, h2, h3, h4, h5 {
 .minibutton a {
   text-decoration: none;
   display: inline-block;
-  padding: .5em 2em .55em;
+  padding: .5em .5em .55em;
   outline: none;
   cursor: pointer;
   text-align: center;
@@ -788,9 +806,7 @@ h1, h2, h3, h4, h5 {
   border: 1pt solid #ffd11b; }
   .downloadblock img {
     padding-left: 1em;
-    vertical-align: bottom;
-    position: relative;
-    bottom: 6em; }
+    vertical-align: bottom; }
   .downloadblock ul {
     vertical-align: top;
     display: inline-block;

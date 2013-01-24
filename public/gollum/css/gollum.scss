@@ -1,6 +1,7 @@
 @import '_buttons';
 @import '_dialog';
 @import '_editor';
+@import '_tables';
 
 $sidebar_border_width: 0.3em;
 $sidebar_border: $sidebar_border_width solid #ffd11b;
@@ -172,8 +173,6 @@ h1, h2, h3, h4, h5 {
   img {
     padding-left: 1em;
     vertical-align: bottom;
-    position: relative;
-    bottom: 6em;
   }
 
   ul {

@@ -19,7 +19,7 @@
  
 @mixin button {
   display: inline-block;
-  padding: .5em 2em .55em;
+  padding: .5em .5em .55em;
   outline: none;
   cursor: pointer;
   text-align: center;
@@ -61,3 +61,4 @@ input[type="file"] > input[type="button"] {
     border: none;
   }
 }
+

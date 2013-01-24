@@ -1,0 +1,28 @@
+$base_color: #ffd11b;
+
+table {
+  border-spacing: 0;
+  border-collapse: collapse;
+  font-size: 0.9em;
+
+  td, th {
+    border: 1px solid $base_color;
+    padding: 0.2em 0.5em;
+  }
+  
+  th {
+    text-align: left;
+    border-bottom: 2pt solid $base_color;
+    white-space: nowrap;
+    background-color: $base_color;
+    color: darken($base_color, 40%);
+  }
+
+  tr {
+    line-height: 1.4em;
+
+    &:nth-child(2n) {
+      background-color: lighten($base_color, 43%);
+    }
+  }
+}
