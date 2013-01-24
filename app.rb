@@ -7,9 +7,9 @@ require 'mustache/sinatra'
 require 'useragent'
 require 'stringex'
 
-require 'views/layout'
-require 'views/editable'
-require 'views/has_page'
+require_relative 'views/layout'
+require_relative 'views/editable'
+require_relative 'views/has_page'
 
 require File.expand_path '../helpers', __FILE__
 
