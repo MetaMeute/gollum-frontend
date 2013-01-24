@@ -806,7 +806,9 @@ h1, h2, h3, h4, h5 {
   border: 1pt solid #ffd11b; }
   .downloadblock img {
     padding-left: 1em;
-    vertical-align: bottom; }
+    vertical-align: bottom;
+    position: relative;
+    bottom: 6em; }
   .downloadblock ul {
     vertical-align: top;
     display: inline-block;
