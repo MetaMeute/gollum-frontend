@@ -18,6 +18,7 @@ require 'gollum'
 exec = {}
 options = { 'port' => 4567, 'bind' => '0.0.0.0' }
 wiki_options = {}
+wiki_options[:sanitization] = false
 
 opts = OptionParser.new do |opts|
   opts.banner = help
@@ -109,6 +110,7 @@ if options['irb']
 
   begin
     wiki = Gollum::Wiki.new(gollum_path, wiki_options)
+    wiki.sanitization = false
     if !wiki.exist? then raise Grit::InvalidGitRepositoryError end
     puts "Loaded Gollum wiki at #{File.expand_path(gollum_path).inspect}."
     puts
