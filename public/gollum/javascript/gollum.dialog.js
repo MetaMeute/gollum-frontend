@@ -79,6 +79,10 @@
           fieldAttributes.id + '">';
       }
 
+      if( fieldAttributes.context ){
+        html += '<span class="context">' + fieldAttributes.context + '</span>';
+      }
+
       return html;
     },
 
@@ -233,6 +237,7 @@
                 $('#gollum-dialog-dialog').animate({ opacity: 1 }, {
                 duration: 500
                 });
+                $($('#gollum-dialog-dialog input[type="text"]').get(0)).focus();
               }
             });
           }

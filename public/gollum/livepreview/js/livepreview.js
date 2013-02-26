@@ -87,6 +87,18 @@ defaultCommitMessage = function() {
 // Set comment using the default commit message.
 commentEditorSession.setValue( defaultCommitMessage() );
 
+$.preview = function( previewWindow ) {
+    jQuery.ajax( {
+      type: 'POST',
+      url: baseUrl + '/preview',
+      data: { page: 'Preview: ' + pageName, format: 'markdown', content: editorSession.getValue() },
+      success: function( html ) {
+        previewWindow.document.write( html );
+        previewWindow.focus();
+      }
+    });
+}
+
 $.save = function( commitMessage ) {
   win.onbeforeunload = null;
 
@@ -96,8 +108,9 @@ $.save = function( commitMessage ) {
   var msg = defaultCommitMessage();
   var newLocation = baseUrl;
 
+  // Remove all duplicate slashes
   function clean( str ) {
-    return str.replace(/^\/+/, '/');
+    return str.replace(/\/+/g, '/');
   }
 
   // 'a%2Fb' => a/b
@@ -194,13 +207,14 @@ var previewSet = function( text ) {
   }
 };
 
-// 'c', 'c++', 'cpp' are github specific and transformed to c_cpp for Ace.
-var languages = [ 'c', 'c++', 'cpp', 'clojure', 'coffee', 'coldfusion',
- 'csharp', 'css', 'diff', 'golang', 'groovy', 'haxe', 'html',
- 'java', 'javascript', 'json', 'latex', 'less', 'liquid',
- 'lua', 'markdown', 'ocaml', 'perl', 'pgsql', 'php', 'powershell',
- 'python', 'ruby', 'scad', 'scala', 'scss', 'sh', 'sql', 'svg',
- 'textile', 'text', 'xml', 'xquery', 'yaml' ];
+// See pygmentsLanguageToAceMode for pygment to ace mode translations.
+// TODO: Update languages and translation once Ace is upgraded to v1.0.
+var languages = [ 'c', 'c++', 'cpp', 'clojure', 'coffee',
+  'coffeescript', 'coldfusion', 'csharp', 'css', 'diff', 'golang',
+  'groovy', 'haxe', 'html', 'java', 'javascript', 'json', 'latex',
+  'less', 'liquid', 'lua', 'markdown', 'ocaml', 'perl', 'pgsql', 'php',
+  'powershell', 'python', 'ruby', 'scad', 'scala', 'scss', 'sh', 'sql',
+  'svg', 'textile', 'text', 'xml', 'xquery', 'yaml' ];
 
 var staticHighlight = require( 'ace/ext/static_highlight' );
 var githubTheme = require( 'ace/theme/github' );
@@ -243,6 +257,31 @@ function highlight( element, language ) {
   element.parentNode.parentNode.replaceChild( newDiv, element.parentNode );
 }
 
+// Pygments and Ace have different names for languages.
+function pygmentsLanguageToAceMode( declaredLanguage ) {
+  declaredLanguage = declaredLanguage.toLowerCase();
+
+  switch ( declaredLanguage ) {
+    case 'bash':
+      return 'sh';
+    case 'c':
+    case 'c++':
+    case 'cpp':
+    case 'objective-c':
+      return 'c_cpp';
+    case 'c#':
+      return 'csharp';
+    case 'coffeescript':
+      return 'coffee';
+    case 'html+erb':
+      return 'html'
+  }
+
+  // Assume language name is the same
+  // if it's not handled above.
+  return declaredLanguage;
+}
+
 var makePreviewHtml = function () {
   var text = editorSession.getValue();
 
@@ -259,6 +298,8 @@ var makePreviewHtml = function () {
   }
 
   var prevTime = new Date().getTime();
+  // Handle gollum file code insertion syntax.
+  text = text.replace(/^[ \t]*``` ?([^:\n\r]+:[^`\n\r]+)```/gm, '``$1``');
   text = md_to_html( text );
 
   // Calculate the processing time of the HTML creation.
@@ -293,15 +334,7 @@ var makePreviewHtml = function () {
       // the syntax for code highlighting means all code, even one line, contains newlines.
       if ( txt.length > 1 && codeHTML.match( /\n/ ) ) {
         var declaredLanguage = element.className.toLowerCase();
-        var aceMode = declaredLanguage;
-
-        // GitHub supports 'c', 'c++', 'cpp'
-        // which must trigger the 'c_cpp' mode in Ace.
-        if ( declaredLanguage === 'c'   ||
-             declaredLanguage === 'c++' ||
-             declaredLanguage === 'cpp' ) {
-          aceMode = 'c_cpp';
-        }
+        var aceMode = pygmentsLanguageToAceMode( declaredLanguage );
 
         if ( $.inArray( declaredLanguage, languages ) === -1 ) {
           // Unsupported language.
@@ -359,8 +392,16 @@ var applyTimeout = function () {
     });
   }
 
+  $( '#preview' ).click( function() {
+    $(this).target = "_blank";
+    // pass window into preview
+    $.preview( window.open() );
+    return false;
+  });
+
   $( '#save' ).click( function() {
     $.save();
+    return false;
   });
 
   // Hide dimmer, comment tool panel, and comment.
@@ -423,7 +464,7 @@ var applyTimeout = function () {
 
     // width -2 for scroll bar & -10 for left offset
     var previewStyle = 'width:' + (widthHalf - 2 - 10) + 'px;' +
-      'height:' + height + 'px;' +
+      'height:' + (height -50) + 'px;' +
       'left:' + (leftRight === false ? '10px;' : widthHalf + 'px;') +
        // preview panel top is equal to height of comment tool panel (40px) + 1
       'top:41px;';

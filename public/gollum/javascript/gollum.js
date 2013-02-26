@@ -1,10 +1,47 @@
+// Helpers
+function pageName(){
+  // "my/dir/file" => "file"
+  return typeof(pageFullPath) == 'undefined' ? undefined : pageFullPath.split('/').pop();
+}
+function pagePath(){
+  // "my/dir/file" => "my/dir"
+  return typeof(pageFullPath) == 'undefined' ? undefined : pageFullPath.split('/').slice(0,-1).join('/');
+}
+
+// Generic HTML escape function
+function htmlEscape( str ) {
+  // The (slower) alternative is: return $('<div/>').text(str).html();
+  // http://stackoverflow.com/questions/1219860/javascript-jquery-html-encoding/7124052#7124052
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+// Given a page name and a current path, returns a fully qualified path.
+function abspath(path, name){
+  // Make sure the given path starts at the root.
+  if(name[0] != '/'){
+    name = '/' + name;
+    if (path) {
+      name = '/' + path + name;
+    }
+  }
+  var name_parts = name.split('/');
+  var newPath = name_parts.slice(0, -1).join('/');
+  var newName = name_parts.pop();
+  // return array of [path, name]
+  return [newPath, newName];
+}
+
 // ua
 $(document).ready(function() {
   $('#delete-link').click( function(e) {
     var ok = confirm($(this).data('confirm'));
     if ( ok ) {
-      var loc = window.location;
-      loc = baseUrl + '/delete' + loc.pathname.replace(baseUrl,'');
+      var loc = baseUrl + '/delete/' + pageFullPath;
       window.location = loc;
     }
     // Don't navigate on cancel.
@@ -113,11 +150,12 @@ $(document).ready(function() {
     $('#minibutton-rename-page').click(function(e) {
       e.preventDefault();
 
-      // Path name without the leading slash.
-      var pathname = window.location.pathname.substr(1);
-      var slashIndex = pathname.lastIndexOf('/');
-      var oldName = pathname.substr(slashIndex + 1)
-      var path = pathname.substr(0, slashIndex);
+      var path = pagePath();
+      var oldName = pageName();
+      var context_blurb = 
+        "Renamed page will be under " +
+        "<span class='path'>" + htmlEscape('/' + path) + "</span>" +
+        " unless an absolute path is given."
 
       $.GollumDialog.init({
         title: 'Rename Page',
@@ -126,7 +164,8 @@ $(document).ready(function() {
             id:   'name',
             name: 'Rename to',
             type: 'text',
-            defaultValue: oldName || ''
+            defaultValue: oldName || '',
+            context: context_blurb
           }
         ],
         OK: function( res ) {
@@ -134,16 +173,17 @@ $(document).ready(function() {
           if ( res['name'] ) {
             newName = res['name'];
           }
+          var name_parts = abspath(path, newName);
+          var newPath = name_parts[0];
 
-          var msg = 'Renamed ' + oldName + ' to ' + newName;
-          jQuery.ajax( {
-            type: 'POST',
-            url: baseUrl + '/edit/' + oldName,
-            data:  { path: path, rename: newName, page: oldName, message: msg },
-            success: function() {
-                window.location = baseUrl + '/' + encodeURIComponent(newName);
-            }
-          });
+          var msg = '/' + path == newPath ? 'Renamed ' + oldName + ' to ' + newName
+                                          : 'Renamed ' + oldName + ' to ' + name_parts.join('/');
+          // Fill in the rename form
+          // This is preferable to AJAX so that we automatically follow the 302 response.
+          var rename_form = $("form[name=rename]");
+          rename_form.children("input[name=rename]").val(name_parts.join('/'));
+          rename_form.children("input[name=message]").val(msg);
+          rename_form.submit();
         }
       });
     });
@@ -154,6 +194,23 @@ $(document).ready(function() {
     $('#minibutton-new-page').click(function(e) {
       e.preventDefault();
 
+      var path = pagePath();
+      if( path === undefined && $('#file-browser').length != 0 ){
+        // In the pages view, pageFullPath isn't defined.
+        // The new button will still expect a value however.
+        // So we try to figure one out from window.location
+        path = baseUrl == '' ? window.location.pathname.substr(1)
+                             : window.location.pathname.substr(baseUrl.length + 1);
+        // Remove the page viewer part of the url.
+        path = path.replace(/^pages\/?/,'')
+        // For consistency remove the trailing /
+        path = path.replace(/\/$/,'')
+      }
+      var context_blurb = 
+        "Page will be created under " +
+        "<span class='path'>" + htmlEscape('/' + path) + "</span>" +
+        " unless an absolute path is given."
+
       $.GollumDialog.init({
         title: 'Create New Page',
         fields: [
@@ -161,7 +218,8 @@ $(document).ready(function() {
             id:   'name',
             name: 'Page Name',
             type: 'text',
-            defaultValue: ''
+            defaultValue: '',
+            context: context_blurb
           }
         ],
         OK: function( res ) {
@@ -169,7 +227,13 @@ $(document).ready(function() {
           if ( res['name'] ) {
             name = res['name'];
           }
-          window.location = baseUrl + '/' + encodeURIComponent(name);
+          var name_encoded = [];
+          var name_parts = abspath(path, name).join('/').split('/');
+          // Split and encode each component individually.
+          for( var i=0; i < name_parts.length; i++ ){
+            name_encoded.push(encodeURIComponent(name_parts[i]));
+          }
+          window.location = baseUrl + name_encoded.join('/');
         }
       });
     });
@@ -210,6 +274,39 @@ $(document).ready(function() {
     $('a.gollum-revert-button').click(function(e) {
       e.preventDefault();
       $('#gollum-revert-form').submit();
+    });
+  }
+
+  if( $('#wiki-wrapper.edit').length ){
+    $("#gollum-editor-submit").click( function() { window.onbeforeunload = null; } );
+    $("#gollum-editor-body").one('change', function(){
+      window.onbeforeunload = function(){ return "Leaving will discard all edits!" };
+    });
+    $.GollumEditor();
+  }
+
+  if( $('#wiki-wrapper.create').length ){
+    $("#gollum-editor-submit").click( function() { window.onbeforeunload = null; } );
+    $("#gollum-editor-body").one('change', function(){
+      window.onbeforeunload = function(){ return "Leaving will not create a new page!" };
+    });
+    $.GollumEditor({ NewFile: true, MarkupType: default_markup });
+  }
+
+  if( $('#wiki-history').length ){
+    var lookup = {};
+    $('img.identicon').each(function(index, element){
+      var $item   = $(element);
+      var code    = parseInt($item.data('identicon'), 10);
+      var img_bin = lookup[code];
+      if( img_bin === undefined ){
+        var size = 16;
+        var canvas = $('<canvas width=16 height=16/>').get(0);
+        render_identicon(canvas, code, 16);
+        img_bin = canvas.toDataURL("image/png");
+        lookup[code] = img_bin;
+      }
+      $item.attr('src', img_bin);
     });
   }
 });
