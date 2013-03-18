@@ -455,7 +455,7 @@ var applyTimeout = function () {
 
     // height minus 50 so the end of document text doesn't flow off the page.
     // + 15 for scroll bar
-    var editorContainerStyle = 'width:' + (widthHalf + 15) + 'px;' +
+    var editorContainerStyle = 'width:' + widthHalf + 'px;' +
       'height:' + (height - 50) + 'px;' +
       'left:' + (leftRight === false ? widthHalf + 'px;' : '0px;') +
       'top:' + '40px;'; // use 40px for tool menu
