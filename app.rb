@@ -1,7 +1,9 @@
-require 'cgi'
 require 'rubygems'
+require 'bundler/setup'
+
+require 'cgi'
 require 'net/ldap'
-require 'gollum'
+require 'gollum-lib'
 require 'sinatra'
 require 'mustache/sinatra'
 require 'useragent'
@@ -12,6 +14,7 @@ require_relative 'views/editable'
 require_relative 'views/has_page'
 
 require File.expand_path '../helpers', __FILE__
+require File.expand_path('../uri_encode_component', __FILE__)
 
 # Fix to_url
 class String

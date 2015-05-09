@@ -11,14 +11,15 @@ Basic Command Line Usage:
 Options:
 HELP
 
-require 'optparse'
 require 'rubygems'
-require 'gollum'
+require 'bundler/setup'
+
+require 'optparse'
+require 'gollum-lib'
 
 exec = {}
 options = { 'port' => 4567, 'bind' => '0.0.0.0' }
 wiki_options = {}
-wiki_options[:sanitization] = false
 
 opts = OptionParser.new do |opts|
   opts.banner = help
