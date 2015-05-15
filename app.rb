@@ -221,24 +221,61 @@ module Precious
       wikip = wiki_page(params[:splat].first)
       @name = wikip.name
       @path = wikip.path
+
       wiki = wikip.wiki
       if page = wikip.page
         if wiki.live_preview && page.format.to_s.include?('markdown') && supported_useragent?(request.user_agent)
-          live_preview_url = '/livepreview/index.html?page=' + encodeURIComponent(@name)
+          live_preview_url = '/livepreview/?page=' + encodeURIComponent(@name)
           if @path
             live_preview_url << '&path=' + encodeURIComponent(@path)
           end
           redirect to(live_preview_url)
         else
-          @page = page
+          @page         = page
           @page.version = wiki.repo.log(wiki.ref, @page.path).first
-          raw_data = page.raw_data
-          @content = raw_data.respond_to?(:force_encoding) ? raw_data.force_encoding('ASCII-8BIT') : raw_data
+          @content      = page.text_data
           mustache :edit
         end
       else
         redirect to("/create/#{encodeURIComponent(@name)}")
       end
+    end
+
+    post '/rename/*' do
+      protected!
+      wikip = wiki_page(params[:splat].first)
+      halt 500 if wikip.nil?
+      wiki   = wikip.wiki
+      page   = wiki.paged(wikip.name, wikip.path, exact = true)
+      rename = params[:rename]
+      halt 500 if page.nil?
+      halt 500 if rename.nil? or rename.empty?
+
+      # Fixup the rename if it is a relative path
+      # In 1.8.7 rename[0] != rename[0..0]
+      if rename[0..0] != '/'
+        source_dir                = ::File.dirname(page.path)
+        source_dir                = '' if source_dir == '.'
+        (target_dir, target_name) = ::File.split(rename)
+        target_dir                = target_dir == '' ? source_dir : "#{source_dir}/#{target_dir}"
+        rename                    = "#{target_dir}/#{target_name}"
+      end
+
+      committer = Gollum::Committer.new(wiki, commit_message)
+      commit    = { :committer => committer }
+
+      success = wiki.rename_page(page, rename, commit)
+      if !success
+        # This occurs on NOOPs, for example renaming A => A
+        redirect to("/#{page.escaped_url_path}")
+        return
+      end
+      committer.commit
+
+      wikip = wiki_page(rename)
+      page  = wiki.paged(wikip.name, wikip.path, exact = true)
+      return if page.nil?
+      redirect to("/#{page.escaped_url_path}")
     end
 
     post '/edit/*' do
@@ -248,18 +285,15 @@ module Precious
       page_name = CGI.unescape(params[:page])
       wiki      = wiki_new
       page      = wiki.paged(page_name, path, exact = true)
-      rename    = params[:rename].to_url if params[:rename]
-      name      = rename || page.name
+      return if page.nil?
       committer = Gollum::Committer.new(wiki, commit_message)
-      commit    = {:committer => committer}
+      commit    = { :committer => committer }
 
-      update_wiki_page(wiki, page, params[:content], commit, name, params[:format])
-      update_wiki_page(wiki, page.header,  params[:header],  commit) if params[:header]
-      update_wiki_page(wiki, page.footer,  params[:footer],  commit) if params[:footer]
+      update_wiki_page(wiki, page, params[:content], commit, page.name, params[:format])
+      update_wiki_page(wiki, page.header, params[:header], commit) if params[:header]
+      update_wiki_page(wiki, page.footer, params[:footer], commit) if params[:footer]
       update_wiki_page(wiki, page.sidebar, params[:sidebar], commit) if params[:sidebar]
       committer.commit
-
-      page = wiki.page(rename) if rename
 
       redirect to("/#{page.escaped_url_path}") unless page.nil?
     end
@@ -316,7 +350,9 @@ module Precious
       sha1         = shas.shift
       sha2         = shas.shift
 
-      if wiki.revert_page(@page, sha1, sha2, commit_message)
+      commit           = commit_message
+      commit[:message] = "Revert commit #{sha1.chars.take(7).join}"
+      if wiki.revert_page(@page, sha1, sha2, commit)
         redirect to("/#{@page.escaped_url_path}")
       else
         sha2, sha1 = sha1, "#{sha1}^" if !sha2
@@ -329,34 +365,52 @@ module Precious
     end
 
     post '/preview' do
-      wiki     = wiki_new
-      @name    = params[:page] || "Preview"
-      @page    = wiki.preview_page(@name, params[:content], params[:format])
-      @content = @page.formatted_data
-      @toc_content = wiki.universal_toc ? @page.toc_data : nil
-      @mathjax = wiki.mathjax
-      @editable = false
+      wiki           = wiki_new
+      @name          = params[:page] || "Preview"
+      @page          = wiki.preview_page(@name, params[:content], params[:format])
+      @content       = @page.formatted_data
+      @toc_content   = wiki.universal_toc ? @page.toc_data : nil
+      @mathjax       = wiki.mathjax
+      @h1_title      = wiki.h1_title
+      @editable      = false
       mustache :page
     end
 
+    get '/livepreview/' do
+      wiki = wiki_new
+      @mathjax = wiki.mathjax
+      mustache :livepreview, { :layout => false }
+    end
+
     get '/history/*' do
-      @page        = wiki_page(params[:splat].first).page
-      @page_num    = [params[:page].to_i, 1].max
-      @versions    = @page.versions :page => @page_num
-      mustache :history
+      @page     = wiki_page(params[:splat].first).page
+      @page_num = [params[:page].to_i, 1].max
+      unless @page.nil?
+        @versions = @page.versions :page => @page_num
+        mustache :history
+      else
+        redirect to("/")
+      end
+    end
+
+    get '/latest_changes' do
+      @wiki = wiki_new
+      max_count = settings.wiki_options.fetch(:latest_changes_count, 10)
+      @versions = @wiki.latest_changes({:max_count => max_count})
+      mustache :latest_changes
     end
 
     post '/compare/*' do
-      @file     = params[:splat].first
+      @file     = encodeURIComponent(params[:splat].first)
       @versions = params[:versions] || []
       if @versions.size < 2
         redirect to("/history/#{@file}")
       else
         redirect to("/compare/%s/%s...%s" % [
-          @file,
-          @versions.last,
-          @versions.first]
-        )
+            @file,
+            @versions.last,
+            @versions.first]
+                 )
       end
     end
 
@@ -453,12 +507,18 @@ module Precious
       path = '/' if path.nil?
 
       if page = wiki.paged(name, path, exact = true)
-        @page = page
-        @name = name
-        @editable = true
-        @content = page.formatted_data
-        @toc_content = wiki.universal_toc ? @page.toc_data : nil
-        @mathjax = wiki.mathjax
+        @page          = page
+        @name          = name
+        @content       = page.formatted_data
+
+        # Extensions and layout data
+        @editable      = true
+        @page_exists   = !page.versions.empty?
+        @toc_content   = wiki.universal_toc ? @page.toc_data : nil
+        @mathjax       = wiki.mathjax
+        @h1_title      = wiki.h1_title
+        @bar_side      = wiki.bar_side
+
         mustache :page
       elsif file = wiki.file(fullpath)
         content_type file.mime_type

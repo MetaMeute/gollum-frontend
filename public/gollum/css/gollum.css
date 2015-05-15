@@ -30,8 +30,8 @@ input[type="file"] > input[type="button"]::-moz-focus-inner {
   background-color: #fff;
   overflow: hidden;
   padding: 1em;
-  background: -webkit-gradient(linear, left top, left bottom, from(#f7f7f7), to(white));
-  background: -moz-linear-gradient(top, #f7f7f7, white); }
+  background: -webkit-gradient(linear, left top, left bottom, from(#f7f7f7), to(#ffffff));
+  background: -moz-linear-gradient(top, #f7f7f7, #ffffff); }
 
 #gollum-dialog-dialog-inner h4 {
   border-bottom: 1px solid #ddd;
@@ -470,7 +470,7 @@ a#function-help:hover span {
   float: left;
   margin: 0;
   padding: 0.15em 0 0 0.3em;
-  text-shadow: 0 -1px 0 white; }
+  text-shadow: 0 -1px 0 #fff; }
 
 #gollum-editor .collapsed h4 {
   color: #bbb; }
@@ -599,7 +599,7 @@ a#function-help:hover span {
   height: 100%;
   width: auto;
   padding: 0.2em 1em;
-  text-shadow: 0 -1px 0 white; }
+  text-shadow: 0 -1px 0 #fff; }
 
 #gollum-editor-help-parent li a:hover,
 #gollum-editor-help-list li a:hover {
@@ -674,7 +674,7 @@ header h1 {
   padding: 1em 0; }
 
 a {
-  color: #333377; }
+  color: #337; }
 
 header a, .sidebar a {
   text-decoration: none; }
@@ -721,13 +721,14 @@ h1, h2, h3, h4, h5 {
     color: #fff; }
   #head * {
     margin: 0; }
-  #head .page-actions {
-    position: absolute;
-    right: 0;
-    text-align: right;
-    padding: 0 0.5em; }
-    #head .page-actions li {
-      display: inline-block; }
+
+.page-actions {
+  position: absolute;
+  right: 0;
+  text-align: right;
+  padding: 0 0.5em; }
+  .page-actions li {
+    display: inline-block; }
 
 #container {
   position: relative; }
@@ -775,10 +776,10 @@ h1, h2, h3, h4, h5 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
   text-shadow: 0 1px 1px rgba(0, 0, 0, 0.3);
   border: solid 1px #2b2b2b;
-  background-color: #333333;
-  background: -webkit-gradient(linear, left top, left bottom, from(#545454), to(#333333));
-  background: -moz-linear-gradient(top, #545454, #333333);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr:'#545454', endColorstr:'#333333');
+  background-color: #333;
+  background: -webkit-gradient(linear, left top, left bottom, from(#545454), to(#333));
+  background: -moz-linear-gradient(top, #545454, #333);
+  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr:'#545454', endColorstr:'#333');
   color: #eaeaea; }
   .minibutton a:hover {
     text-decoration: none; }
@@ -792,9 +793,9 @@ h1, h2, h3, h4, h5 {
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr:'#4d4d4d', endColorstr:'#262626'); }
   .minibutton a:active {
     background-color: #4d4d4d;
-    background: -webkit-gradient(linear, left top, left bottom, from(#333333), to(#4d4d4d));
-    background: -moz-linear-gradient(top, #333333, #4d4d4d);
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr:'#333333', endColorstr:'#4d4d4d');
+    background: -webkit-gradient(linear, left top, left bottom, from(#333), to(#4d4d4d));
+    background: -moz-linear-gradient(top, #333, #4d4d4d);
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr:'#333', endColorstr:'#4d4d4d');
     color: #c1c1c1; }
 
 .downloadblock {
@@ -829,3 +830,5 @@ span.tag {
   font-size: 0.8em;
   padding: 0.1em 0.4em;
   border-radius: 0.3em; }
+
+/*# sourceMappingURL=gollum.css.map */

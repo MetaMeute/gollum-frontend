@@ -23,6 +23,15 @@ module Precious
       def base_url
         @base_url
       end
+
+      def css # custom css
+        @css
+      end
+
+      def js # custom js
+        @js
+      end
+
     end
   end
 end

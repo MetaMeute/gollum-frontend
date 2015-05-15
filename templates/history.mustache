@@ -8,9 +8,9 @@
        class="action-edit-page">Edit Page</a></li>
   </ul>
 </div>
-<div id="wiki-content">
+<div id="wiki-history">
 
-  <ul class="actions">
+  <ul class="actions page-actions">
     <li class="minibutton"><a href="javascript:void(0);"
        class="action-compare-revision">Compare Revisions</a></li>
   </ul>
@@ -27,14 +27,10 @@
           <input type="checkbox" name="versions[]" value="{{id}}">
         </td>
         <td class="author">
-          <a href="javascript:void(0)">
-            <img src="https://secure.gravatar.com/avatar/{{gravatar}}?s=16"
-             alt="avatar: {{author}}" class="mini-gravatar">
-            <span class="username">{{author}}</span>
-          </a>
+            {{>author_template}}
         </td>
         <td class="commit-name">
-          <span class="time-elapsed">{{date}}:</span>&nbsp;
+          <span class="time-elapsed" title="{{date_full}}">{{date}}:</span>&nbsp;
           {{message}}
           [<a href="{{base_url}}/{{escaped_url_path}}/{{id}}" title="View commit">{{id7}}</a>]
         </td>
@@ -47,7 +43,7 @@
   </form>
 </div>
 <div id="footer">
-  <ul class="actions">
+  <ul class="actions page-actions">
     <li class="minibutton"><a href="javascript:void(0);"
        class="action-compare-revision">Compare Revisions</a></li>
 

@@ -103,14 +103,15 @@ h1, h2, h3, h4, h5 {
     margin: 0;
   }
 
-  .page-actions {
-    position: absolute;
-    right: 0;
-    text-align: right;
-    padding: 0 0.5em;
-    li {
-      display: inline-block;
-    }
+}
+
+.page-actions {
+  position: absolute;
+  right: 0;
+  text-align: right;
+  padding: 0 0.5em;
+  li {
+    display: inline-block;
   }
 }
 

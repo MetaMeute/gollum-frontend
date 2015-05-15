@@ -9,6 +9,12 @@
   <link rel="stylesheet" type="text/css" href="{{base_url}}/css/ie7.css" media="all">
   <![endif]-->
 
+  <script>
+      var baseUrl = '{{base_url}}';
+      {{#page}}
+      var pageFullPath = '{{url_path_display}}';
+      {{/page}}
+  </script>
   <script>var baseUrl = '{{base_url}}'</script>
   <script type="text/javascript" src="{{base_url}}/javascript/jquery-1.7.2.min.js"></script>
   <script type="text/javascript" src="{{base_url}}/javascript/mousetrap.min.js"></script>
@@ -53,6 +59,8 @@
         <li>
           {{>searchbar}}
         </li>
+        <li><a href="{{base_url}}/latest_changes"
+           class="action-page-history">Latest Changes</a></li>
         <li><a href="{{base_url}}/pages"
           class="action-all-pages">All</a></li>
         <li><a href="{{base_url}}/fileview"

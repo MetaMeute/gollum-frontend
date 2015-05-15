@@ -1,6 +1,8 @@
 <div id="wiki-wrapper" class="compare">
 <div id="head">
-  <ul class="actions">
+  <h1>History for <strong>{{path}}</strong></h1>
+
+  <ul class="actions page-actions">
     <li class="minibutton"><a href="{{base_url}}/{{escaped_url_path}}"
        class="action-view-page">View Page</a></li>
     <li class="minibutton"><a href="{{base_url}}/edit/{{escaped_url_path}}"
@@ -8,7 +10,6 @@
     <li class="minibutton"><a href="{{base_url}}/history/{{escaped_url_path}}"
        class="action-page-history">Page History</a></li>
   </ul>
-  <h1>History for <strong>{{path}}</strong></h1>
 </div>
 
 {{#message}}
@@ -18,7 +19,7 @@
 <div id="compare-content">
 
   {{#show_revert}}
-  <ul class="actions">
+  <ul class="actions page-actions">
     <li class="minibutton"><a href="{{base_url}}/history/{{escaped_url_path}}"
        class="action-page-history">Back to Page History</a></li>
     <li class="minibutton">
@@ -44,7 +45,7 @@
   </div>
 </div>
 <div id="footer">
-  <ul class="actions">
+  <ul class="actions page-actions">
     <li class="minibutton"><a href="{{base_url}}/history/{{escaped_url_path}}"
        class="action-page-history">Back to Page History</a></li>
     {{#show_revert}}
